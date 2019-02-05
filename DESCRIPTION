@@ -1,0 +1,29 @@
+Package: deconR
+Type: Package
+Title: Computational deconvolution 
+Version: 0.1.0
+Author: Shan Sabri <ShanASabri@gmail.com>
+Maintainer: Shan Sabri <ShanASabri@gmail.com>
+Depends: R (>= 3.1.0)
+Description: Histone modification profiles are informative for understanding gene regulation for a given cell type. 
+  However, current histone modification profiling technologies yield averaged profiles of a mixture of cells that mask
+  individual cell type-specific profiles. This is a major shortcoming given that cellular variability is inherent in 
+  most cell populations. The current method for single cell ChIP-seq has low per-cell sequencing coverage and exhibits
+  a signal-to-noise ratio too high for meaningful interpretation. Here, we present a method that predicts chromatin maps
+  at the single cell type level by jointly modeling population epigenetic data with single cell transcriptomics. We
+  train a machine learning model to learn relationships between gene expression and chromatin features using a compendium 
+  of data containing histone modification maps and gene expression profiles. To deconvolve the histone profiles of a complex
+  mixture of cells we integrate two types of models that account for within- and across-cell type relationships. The 
+  within-cell type model leverages information about expression of nearby genes, and the across-cell type model predicts 
+  ChIP-seq profiles from the expression of all genes. Using these relationships, we can infer histone modification profiles 
+  at the individual cell type level using single cell expression data. This allows us to annotate difference in cis-regulatory 
+  sites, such as enhancers, between cell types from complex population of cells. We apply this framework to the context of 
+  reprogramming somatic cells into induced pluripotent stem cells (iPSCs), a process limited by low conversion efficiency 
+  potentially due to epigenetic barriers that are difficult to overcome. It is unclear which chromatin changes allow some 
+  cells to progress towards pluripotency. Our preliminary results suggest our model can predict cell type-specific enhancers 
+  within somatic and iPSC populations solely from single cell gene expression data. Utilizing these different data types 
+  will provide a foundation for understanding the regulatory program at the single cell or subpopulation level. 
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
