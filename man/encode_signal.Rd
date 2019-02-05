@@ -12,7 +12,7 @@
 data(encode_signal)
 }
 \description{
-Data from 87 mouse cell types source from ENCODE contains H3K27ac raw
+Data from 87 mouse cell types source from ENCODE contains scaled (log2) H3K27ac
 signal indensity values with a genomic resolution of 200 bps covering all
 of chr16 (491038 non-overlapping 200bp bins).
 }

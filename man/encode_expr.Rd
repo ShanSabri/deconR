@@ -12,7 +12,7 @@
 data(encode_expr)
 }
 \description{
-Data from 87 mouse cell types source from ENCODE contains RNA-seq raw
+Data from 87 mouse cell types source from ENCODE contains RNA-seq depth-normalized
 TPM values with replicates aggregrated for 14539 genes.
 }
 \examples{
