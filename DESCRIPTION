@@ -23,6 +23,21 @@ Description: Histone modification profiles are informative for understanding gen
   cells to progress towards pluripotency. Our preliminary results suggest our model can predict cell type-specific enhancers 
   within somatic and iPSC populations solely from single cell gene expression data. Utilizing these different data types 
   will provide a foundation for understanding the regulatory program at the single cell or subpopulation level. 
+Imports:
+    rtracklayer,
+    GenomeInfoDb,
+    ClusterR,
+    GenomicRanges,
+    ggplot2,
+    ggrepel,
+    pheatmap,
+    RColorBrewer,
+    stats,
+    grDevices, 
+    ggplotify, 
+    cowplot,
+    FNN
+Suggests:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
