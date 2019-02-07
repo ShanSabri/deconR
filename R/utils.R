@@ -95,7 +95,8 @@ make_convolved <- function(x, log2_scale = TRUE){
 #'
 #' @param x a \code{GRanges} object with ChIP-seq signal data with rows as
 #' genomic bins and columns as cell types
-#' @param k number of k clusters
+#' @param k the number of k clusters
+#' @param iter the number of clustering iterations (about 10 is typically sufficient)
 #'
 #' @return a \code{GRanges} object containing genomic coordinates tagged with a
 #' cluster label
@@ -103,10 +104,10 @@ make_convolved <- function(x, log2_scale = TRUE){
 #' @importFrom ClusterR KMeans_arma predict_KMeans
 #' @importFrom GenomicRanges GRanges
 #' @export
-cluster_loci <- function(x, k = 500){
+cluster_loci <- function(x, k = 500, iter = 30){
   km <- ClusterR::KMeans_arma(as.data.frame(mcols(x)),
                               clusters = k,
-                              n_iter = 30,
+                              n_iter = iter,
                               seed_mode = "random_subset",
                               CENTROIDS = NULL, verbose = TRUE, seed = 42)
   pr <- ClusterR::predict_KMeans(as.data.frame(mcols(x)), km)
@@ -115,3 +116,26 @@ cluster_loci <- function(x, k = 500){
   return(gr)
 }
 
+
+#' Write a BigWig track from either a \code{GRanges} or \code{rtracklayer} object
+#'
+#' @param x The object to export
+#' @param out The connection from which data is saved
+#' @param log2_scale boolean indicating whether to log2 scale intensity values (pseudocount of 1)
+#' @param unlog2_scale boolean indicating whether to remove log2 scaled intensity values
+#' (assuming pseudocount of 1)
+#'
+#' @return nothing
+#' @importFrom rtracklayer export.bw
+#' @export
+write_bw <- function(x, out, log2_scale = FALSE, unlog2_scale = FALSE){
+  if(log2_scale == TRUE){
+    mcols(x)$score <- log2(mcols(x)$score + 1)
+  }
+
+  if(unlog2_scale == TRUE){
+    mcols(x)$score <- 2^mcols(x)$score - 1
+  }
+
+  rtracklayer::export.bw(object=x, con=out)
+}

@@ -25,16 +25,18 @@ model_across_celltypes <- function(clusters, scrna_aggr, genes = NULL,
                                    encode_signal, encode_expr, data_split,
                                    output_dir = NULL, seed = 42){
   start_time <- Sys.time()
-  n_clusters <- max(mcols(clusters)$CLUSTER)
+  clusters_list <- split(clusters, f = mcols(clusters)$CLUSTER)
+  n_clusters <- length(clusters_list)
 
   if(is.null(genes)){
     genes <- row.names(encode_expr)
   }
 
-  output <- lapply(seq_along(n_clusters), function(y) {
+  output <- lapply(seq_along(clusters_list), function(y) {
     set.seed(seed)
     print(paste(paste("Cluster", y), paste0(round(difftime(Sys.time(), start_time, units='mins'), 4), " mins elapsed"), sep=": "))
-    bins <- subset(clusters, CLUSTER == y)
+
+    bins <- clusters_list[[y]]
 
     # train
     Y_train <- encode_signal[start(encode_signal) %in% start(bins), data_split$TRAINING]
@@ -59,8 +61,8 @@ model_across_celltypes <- function(clusters, scrna_aggr, genes = NULL,
       heatmap <- plot_loci_heatmap(encode_signal, bins, data_split, min = -3, max = 3)
       top_row <- cowplot::plot_grid(train_plot, validation_plot, labels = "AUTO")
       bottom_row <- cowplot::plot_grid(ggplotify::as.ggplot(heatmap), labels = c('C'), align = 'h')
-      cowplot::plot_grid(top_row, bottom_row, ncol=1, rel_heights = c(1, 1.5)) +
-        cowplot::save_plot(file.path(output_dir, paste0("ACROSS-MODEL-CLUSTER-", y, ".png")), height = 12, width = 14)
+      plot <- cowplot::plot_grid(top_row, bottom_row, ncol=1, rel_heights = c(1, 1.5))
+      cowplot::save_plot(file.path(output_dir, paste0("ACROSS-MODEL-CLUSTER-", y, ".png")), plot, base_height = 12, base_width = 14)
     }
 
     # test
@@ -78,4 +80,71 @@ model_across_celltypes <- function(clusters, scrna_aggr, genes = NULL,
   names(output) <- paste("Cluster", seq(n_clusters), sep = "_")
 
   return(output)
+}
+
+
+#' Compute cell type ratios to split convolved signal based on across-cell type
+#' predictions
+#'
+#' @param x a list containing cluster-specific, average loci intensity predictions,
+#' where each element in the list corresponds to a cluster.
+#'
+#' @return a list containing predictions that are convered to split proportions
+#' @export
+compute_split_proportions <- function(x){
+  cluster_split_proportions <- lapply(seq_along(x), function(y){
+    cluster <- names(x)[y]
+    predictions <- as.data.frame(t(x[[y]]$cluster_prediction_mu))
+    predictions$CLUSTER <- NULL
+    total_prediction <- sum(predictions)
+    return(predictions / total_prediction)
+  })
+  names(cluster_split_proportions) <- names(x)
+
+  return(cluster_split_proportions)
+}
+
+
+
+#' Compute deconvolution from across-cell type modeling based on the
+#' cell type ratios derived from \code{compute_split_proportions}
+#'
+#' @param x A \code{GRanges} object returned from the function \code{compute_split_proportions}
+#' @param cluster_labels A \code{data.frame} or \code{GRanges} object containing
+#' genomic bins associated with a given cluster label
+#' @param convolved a \code{GRanges} object with convolved ChIP-seq signal data
+#' @param verbose boolean indicating whether to flush output to console
+#'
+#' @return a \code{GRanges} object containing metadata of across-cell type
+#' deconvolution
+#' @importFrom GenomicRanges GRanges
+#' @export
+compute_across_model_decon <- function(x, cluster_labels, convolved, verbose = TRUE){
+  across_decon <- do.call(c, lapply(seq_along(x), function(y){
+    clust_id <- names(x)[y]
+    if(verbose == TRUE) message(clust_id)
+
+    clust_bins <- cluster_labels[cluster_labels$CLUSTER == y, ]
+    convolved_bins <- convolved[start(convolved) %in% start(clust_bins)]
+    split_proportion <- as.list(x[[y]])
+
+    cluster_decon <- sapply(split_proportion, function(z){
+      mcols(convolved_bins)$score * z},
+      USE.NAMES = TRUE)
+
+    if(!is.null(dim(cluster_decon))){
+      gr <- GenomicRanges::GRanges(seqnames = seqnames(convolved_bins),
+                                   ranges = ranges(convolved_bins),
+                                   strand = NULL, seqinfo = seqinfo(convolved_bins),
+                                   cluster_decon)
+    } else {
+      gr <- GenomicRanges::GRanges(seqnames = seqnames(convolved_bins),
+                                   ranges = ranges(convolved_bins),
+                                   strand = NULL, seqinfo = seqinfo(convolved_bins),
+                                   t(as.matrix(cluster_decon)))
+    }
+    gr
+  }))
+
+  return(sort(across_decon))
 }
