@@ -4,13 +4,15 @@
 \alias{cluster_loci}
 \title{Cluster genomic loci via accelerated K-Means clustering}
 \usage{
-cluster_loci(x, k = 500)
+cluster_loci(x, k = 500, iter = 30)
 }
 \arguments{
 \item{x}{a \code{GRanges} object with ChIP-seq signal data with rows as
 genomic bins and columns as cell types}
 
-\item{k}{number of k clusters}
+\item{k}{the number of k clusters}
+
+\item{iter}{the number of clustering iterations (about 10 is typically sufficient)}
 }
 \value{
 a \code{GRanges} object containing genomic coordinates tagged with a

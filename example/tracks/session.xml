@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="mm9" hasGeneTrack="true" hasSequenceTrack="true" locus="chr16:31858442-31985043" path="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/session.xml" version="8">
+    <Resources>
+        <Resource path="CONVOLVED.bw"/>
+        <Resource path="MEF-LOG2.bw"/>
+        <Resource path="ESC-LOG2.bw"/>
+        <Resource path="MEF.bw"/>
+        <Resource path="ESC.bw"/>
+        <Resource path="BASELINE-MODEL-LOG2.bw"/>
+        <Resource path="chromHMM/NODOX_18_dense.bed"/>
+        <Resource path="CONVOLVED-LOG2.bw"/>
+        <Resource path="chromHMM/ES_18_dense.bed"/>
+        <Resource path="BASELINE-MODEL.bw"/>
+    </Resources>
+    <Panel height="810" name="DataPanel" width="1133">
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="204,0,51" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/ESC.bw" name="ESC.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="7.2" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="204,0,51" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/ESC-LOG2.bw" name="ESC-LOG2.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3.035624" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="1283560200" fontSize="10" height="20" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/chromHMM/ES_18_dense.bed" name="ChromHMM ESC" renderer="BASIC_FEATURE" sortable="true" visible="true" windowFunction="count"/>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="0,51,255" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/MEF.bw" name="MEF.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="10.89" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="0,51,255" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/MEF-LOG2.bw" name="MEF-LOG2.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3.5716767" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="19535215" fontSize="10" height="20" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/chromHMM/NODOX_18_dense.bed" name="ChromHMM MEF" renderer="BASIC_FEATURE" sortable="true" visible="true" windowFunction="count"/>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="0,153,0" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/CONVOLVED-LOG2.bw" name="CONVOLVED-LOG2.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3.3284056" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="0,153,0" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/CONVOLVED.bw" name="CONVOLVED.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="9.045" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="0,0,0" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/BASELINE-MODEL.bw" name="BASELINE-MODEL.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="4.5225" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" color="0,0,0" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/shansabri/Dropbox/ErnstLab/deconR/example/tracks/BASELINE-MODEL-LOG2.bw" name="BASELINE-MODEL-LOG2.bw" normalize="false" renderer="BAR_CHART" sortable="true" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.4653215" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;292.0;255,255,255;0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" height="35" id="mm9_genes" name="Refseq genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="292.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <Panel height="110" name="FeaturePanel" width="1133">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.8710762331838565"/>
+</Session>
