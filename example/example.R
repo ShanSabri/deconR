@@ -61,28 +61,45 @@ MEF <- read_signal("~/Dropbox/ErnstLab/deconvolution_old/CHIP/signal/full/200bp-
 ESC <- read_signal("~/Dropbox/ErnstLab/deconvolution_old/CHIP/signal/full/200bp-windows/liftOver-mm10/ES_K27AC.sorted.wig", format = "wig", chr = "chr16")
 cts <- list(ct1 = MEF, ct2 = ESC)
 convolved <- make_convolved(cts, log2_scale = TRUE)
-write_bw(convolved, out = file.path(getwd(), "example", "tracks", "CONVOLVED-LOG2.bw")) # already log2 scale
-write_bw(convolved, out = file.path(getwd(), "example", "tracks", "CONVOLVED.bw"), unlog2_scale = TRUE)
-write_bw(MEF, out = file.path(getwd(), "example", "tracks", "MEF.bw"))
-write_bw(MEF, out = file.path(getwd(), "example", "tracks", "MEF-LOG2.bw"), log2_scale = TRUE)
-write_bw(ESC, out = file.path(getwd(), "example", "tracks", "ESC.bw"))
-write_bw(ESC, out = file.path(getwd(), "example", "tracks", "ESC-LOG2.bw"), log2_scale = TRUE)
+convolved_raw <- make_convolved(cts, log2_scale = FALSE)
+# write_bw(convolved, out = file.path(getwd(), "example", "tracks", "CONVOLVED-LOG2.bw")) # already log2 scale
+# write_bw(convolved, out = file.path(getwd(), "example", "tracks", "CONVOLVED.bw"), unlog2_scale = TRUE)
+# write_bw(MEF, out = file.path(getwd(), "example", "tracks", "MEF.bw"))
+# write_bw(MEF, out = file.path(getwd(), "example", "tracks", "MEF-LOG2.bw"), log2_scale = TRUE)
+# write_bw(ESC, out = file.path(getwd(), "example", "tracks", "ESC.bw"))
+# write_bw(ESC, out = file.path(getwd(), "example", "tracks", "ESC-LOG2.bw"), log2_scale = TRUE)
 
 
 
 # Create BASELINE model (50/50 split of cell types above)
 baseline_model <- convolved
 baseline_model$score <- (2^baseline_model$score - 1) / length(cts)
-write_bw(baseline_model, out = file.path(getwd(), "example", "tracks", "BASELINE-MODEL.bw"))
-write_bw(baseline_model, out = file.path(getwd(), "example", "tracks", "BASELINE-MODEL-LOG2.bw"), log2_scale = TRUE)
+# write_bw(baseline_model, out = file.path(getwd(), "example", "tracks", "BASELINE-MODEL.bw"))
+# write_bw(baseline_model, out = file.path(getwd(), "example", "tracks", "BASELINE-MODEL-LOG2.bw"), log2_scale = TRUE)
 
 
 
 # Cluster loci to reduce dimensionality *only cluster training data*
 n_clusters <- 500
-# clusters <- cluster_loci(encode_signal[, data_split$TRAINING], k = n_clusters, iter = 30)
+cluster_obj <- cluster_loci(encode_signal[, data_split$TRAINING], k = n_clusters, iter = 30, seed = 42, return_stats = TRUE)
 # saveRDS(clusters, file.path(getwd(), "example", "CLUSTERS.rds"), compress = TRUE)
-clusters <- readRDS(file.path(getwd(), "example", "CLUSTERS.rds"))
+cluster_obj <- readRDS(file.path(getwd(), "example", "CLUSTERS.rds"))
+clusters <- cluster_obj$CLUSTER
+cluster_stats <- cluster_obj$STATS
+cluster_stats %>%
+  reshape2::melt(id.vars = c("CLUSTER", "N_LOCI")) %>%
+  ggplot(., aes(N_LOCI, value)) +
+  facet_wrap(~variable, nrow = 1, scales = "free_y") +
+  geom_point(alpha = 0.5) +
+  scale_x_log10() +
+  labs(x = "Log10(Number of Loci per Cluster)", y = "", title = paste0("K=", n_clusters),
+       caption = paste0(nrow(subset(cluster_obj$STATS, N_LOCI == 1)), " singleton cluster")) +
+  theme_bw(base_size = 14) +
+  theme(panel.grid = element_blank()) +
+  ggsave(file.path(getwd(), "example", paste0("K", n_clusters, "-CLUSTER-SIZE-BY-MEAN-MEDIAN-MAX-LOG10.png")),
+         height = 3.5, width = 8)
+
+
 
 # Train across-cell type models *one model per cluster*
 # across_model_output <- model_across_celltypes(clusters, scrna_aggr, encode_signal, encode_expr,
@@ -92,7 +109,58 @@ clusters <- readRDS(file.path(getwd(), "example", "CLUSTERS.rds"))
 across_model_output <- readRDS(file.path(getwd(), "example", "ACROSS-MODEL-OUTPUT.rds"))
 cluster_split_proportions <- compute_split_proportions(across_model_output)
 across_model_decon <- compute_across_model_decon(cluster_split_proportions, cluster_labels = clusters,
-                                                 convolved = convolved, verbose = TRUE)
+                                                 convolved = convolved_raw, verbose = TRUE)
+write_bw(across_model_decon[,"Cluster_1"], out = file.path(getwd(), "example", "tracks", "CLUSTER_1-ACROSS-MODEL-LOG2.bw"))
+write_bw(across_model_decon[,"Cluster_23"], out = file.path(getwd(), "example", "tracks", "CLUSTER_23-ACROSS-MODEL-LOG2.bw"))
+write_bw(across_model_decon[,"Cluster_1"], out = file.path(getwd(), "example", "tracks", "CLUSTER_1-ACROSS-MODEL.bw"), unlog2_scale = TRUE)
+write_bw(across_model_decon[,"Cluster_23"], out = file.path(getwd(), "example", "tracks", "CLUSTER_23-ACROSS-MODEL.bw"), unlog2_scale = TRUE)
+
+
+
+
+
+# Within-cell type model feature engineering
+
+
+
+
+
+
+
+
+############## ANALYSIS ############################ ANALYSIS ############################ ANALYSIS ##############
+############## ANALYSIS ############################ ANALYSIS ############################ ANALYSIS ##############
+############## ANALYSIS ############################ ANALYSIS ############################ ANALYSIS ##############
+# CALL PEAKS
+input_files <- list.files(path = file.path(getwd(), "example", "tracks"), pattern = "\\.bw", ignore.case = TRUE, full.names = TRUE)
+atlas <- do.call("c", lapply(seq_along(input_files), function(x){
+  bedgraph <- file.path(dirname(input_files[[x]]), "peaks", "tmp.bedGraph")
+  output_file <- gsub(".bw", ".bed", basename(input_files[[x]]))
+  rtracklayer::export(rtracklayer::import(input_files[[x]]), format="bedGraph", con=bedgraph)
+  cmd <- paste("macs2 bdgbroadcall",
+               "-i", bedgraph,
+               "--outdir", dirname(bedgraph),
+               "-o", output_file
+               )
+  message(cmd)
+  system(cmd, ignore.stdout = TRUE, ignore.stderr = TRUE); system(paste("rm", bedgraph))
+  peaks <- rtracklayer::import(file.path(dirname(bedgraph), output_file))
+  mcols(peaks) <- data.frame(ID = gsub(".bw", "", basename(input_files[[x]])))
+  return(peaks)
+}))
+saveRDS(atlas, compress = TRUE, file.path(getwd(), "example", "tracks", "peaks", "PEAK-ATLAS-ACROSS-MODEL.rds"))
+
+# FILTER PEAKS
+atlas <- readRDS(file.path(getwd(), "example", "tracks", "peaks", "PEAK-ATLAS-ACROSS-MODEL.rds"))
+atlas_split <- split(atlas, f = mcols(atlas))
+# sapply(atlas_split, length)
+f <- 'CLUSTER_23-ACROSS-MODEL-LOG2-UNIQ.bed'
+a <- atlas_split$`CLUSTER_23-ACROSS-MODEL-LOG2`
+b <- atlas_split$`CLUSTER_1-ACROSS-MODEL-LOG2`
+a <- data.frame(chr = seqnames(a), start = start(a), end = end(a)); a$chr <- as.character(a$chr)
+b <- data.frame(chr = seqnames(b), start = start(b), end = end(b)); b$chr <- as.character(b$chr)
+only_a <- bedr::bedr.subtract.region(a, b)
+write.table(only_a, file=file.path(getwd(), "example", "tracks", "peaks", f), quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
 
 
 
@@ -158,3 +226,18 @@ P <- cowplot::plot_grid(P3, P4, labels = "AUTO") +
 ############## TO DO ############################ TO DO ############################ TO DO ############################ TO DO ##############
 ############## TO DO ############################ TO DO ############################ TO DO ############################ TO DO ##############
 ############## TO DO ############################ TO DO ############################ TO DO ############################ TO DO ##############
+# are cluster averages the same from the initial pass? -- YES
+v1 <- readRDS("~/Dropbox/ErnstLab/decon_mouse/output/model-across-celltypes/km-k500-knn2-diffexp-genes-clust-avgs/PREDICTED-CLUSTERS-AVGS-LOG2-K500.rds")
+v1 <- do.call(rbind.data.frame, v1)
+identical(v1$MEF_PREDICTED, scRNA_loci_clust_avgs$Cluster_1); plot(v1$MEF_PREDICTED, scRNA_loci_clust_avgs$Cluster_1) # yes
+identical(v1$ESC_PREDICTED, scRNA_loci_clust_avgs$Cluster_23); plot(v1$ESC_PREDICTED, scRNA_loci_clust_avgs$Cluster_23) # yes
+
+# correlation true w/ base model
+cor(mcols(MEF)$score, mcols(baseline_model)$score) # CORRECT 0.8351757
+cor(mcols(ESC)$score, mcols(baseline_model)$score) # CORRECT 0.8461836
+
+# correlation true w/ decon model
+cor(mcols(MEF)$score, mcols(across_model_decon)$Cluster_1) # should be 0.9078489 but is 0.9029832
+plot(mcols(MEF)$score, mcols(across_model_decon)$Cluster_1) # should be 0.9078489
+cor(mcols(ESC)$score, mcols(across_model_decon)$Cluster_23) # should be 0.91245 but is 0.9098975
+plot(mcols(ESC)$score, mcols(across_model_decon)$Cluster_23) # should be 0.91245

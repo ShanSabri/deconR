@@ -125,7 +125,7 @@ compute_across_model_decon <- function(x, cluster_labels, convolved, verbose = T
     if(verbose == TRUE) message(clust_id)
 
     clust_bins <- cluster_labels[cluster_labels$CLUSTER == y, ]
-    convolved_bins <- convolved[start(convolved) %in% start(clust_bins)]
+    convolved_bins <- sort(convolved[start(convolved) %in% start(clust_bins)])
     split_proportion <- as.list(x[[y]])
 
     cluster_decon <- sapply(split_proportion, function(z){

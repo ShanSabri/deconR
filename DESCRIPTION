@@ -36,7 +36,10 @@ Imports:
     grDevices, 
     ggplotify, 
     cowplot,
-    FNN
+    FNN, 
+    magrittr, 
+    tibble, 
+    dplyr
 Suggests:
 License: GPL-3
 Encoding: UTF-8

@@ -97,24 +97,52 @@ make_convolved <- function(x, log2_scale = TRUE){
 #' genomic bins and columns as cell types
 #' @param k the number of k clusters
 #' @param iter the number of clustering iterations (about 10 is typically sufficient)
+#' @param return_stats boolean indicating whether to return cluster statistics including
+#' cluster mean, median, and max values for all cell types used for training
+#' @param seed set seed for cluster assignment reproducibility
 #'
 #' @return a \code{GRanges} object containing genomic coordinates tagged with a
 #' cluster label
 #' @import ClusterR GenomicRanges
 #' @importFrom ClusterR KMeans_arma predict_KMeans
 #' @importFrom GenomicRanges GRanges
+#' @importFrom tibble as_tibble
+#' @importFrom magrittr "%>%"
+#' @importFrom stats median
 #' @export
-cluster_loci <- function(x, k = 500, iter = 30){
+cluster_loci <- function(x, k = 500, iter = 30, return_stats = TRUE, seed = 42){
   km <- ClusterR::KMeans_arma(as.data.frame(mcols(x)),
                               clusters = k,
                               n_iter = iter,
                               seed_mode = "random_subset",
-                              CENTROIDS = NULL, verbose = TRUE, seed = 42)
+                              CENTROIDS = NULL, verbose = TRUE, seed = seed)
   pr <- ClusterR::predict_KMeans(as.data.frame(mcols(x)), km)
   gr <- GenomicRanges::GRanges(seqnames = seqnames(x), ranges = ranges(x), CLUSTER = as.vector(pr))
 
-  return(gr)
+  if(return_stats == TRUE){
+    tmp <- cbind.data.frame(mcols(gr), mcols(x))
+    tmp %>%
+      dplyr::mutate(MEAN = apply(dplyr::select(tmp, -CLUSTER), 1, mean),
+                    MEDIAN = apply(dplyr::select(tmp, -CLUSTER), 1, median),
+                    MAX = apply(dplyr::select(tmp, -CLUSTER), 1, max)) %>%
+      tibble::as_tibble() %>%
+      dplyr::select(CLUSTER, MEAN, MEDIAN, MAX) -> mcols(gr)
+
+    as.data.frame(mcols(gr)) %>%
+      dplyr::group_by(CLUSTER) %>%
+      dplyr::summarise(
+        N_LOCI = dplyr::n(),
+        MEAN = mean(MEAN),
+        MEDIAN = mean(MEDIAN),
+        MAX = max(MAX)
+      ) -> stats
+  } else {
+    stats <- NULL
+  }
+
+  return(list(CLUSTER = gr, STATS = stats))
 }
+
 
 
 #' Write a BigWig track from either a \code{GRanges} or \code{rtracklayer} object
@@ -129,6 +157,8 @@ cluster_loci <- function(x, k = 500, iter = 30){
 #' @importFrom rtracklayer export.bw
 #' @export
 write_bw <- function(x, out, log2_scale = FALSE, unlog2_scale = FALSE){
+  names(mcols(x)) <- 'score'
+
   if(log2_scale == TRUE){
     mcols(x)$score <- log2(mcols(x)$score + 1)
   }
