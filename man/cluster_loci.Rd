@@ -4,7 +4,7 @@
 \alias{cluster_loci}
 \title{Cluster genomic loci via accelerated K-Means clustering}
 \usage{
-cluster_loci(x, k = 500, iter = 30)
+cluster_loci(x, k = 500, iter = 30, return_stats = TRUE, seed = 42)
 }
 \arguments{
 \item{x}{a \code{GRanges} object with ChIP-seq signal data with rows as
@@ -13,6 +13,11 @@ genomic bins and columns as cell types}
 \item{k}{the number of k clusters}
 
 \item{iter}{the number of clustering iterations (about 10 is typically sufficient)}
+
+\item{return_stats}{boolean indicating whether to return cluster statistics including
+cluster mean, median, and max values for all cell types used for training}
+
+\item{seed}{set seed for cluster assignment reproducibility}
 }
 \value{
 a \code{GRanges} object containing genomic coordinates tagged with a

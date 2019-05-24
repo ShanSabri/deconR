@@ -5,8 +5,8 @@
 \title{Predicts ChIP-seq profiles from gene expression by learned relationships between RNA and
 ChIP within ENCODE data}
 \usage{
-model_across_celltypes(clusters, scrna_aggr, genes = NULL, encode_signal,
-  encode_expr, data_split, output_dir = NULL, seed = 42)
+model_across_celltypes(clusters, scrna_aggr, genes = NULL, k = 3,
+  encode_signal, encode_expr, data_split, output_dir = NULL, seed = 42)
 }
 \arguments{
 \item{clusters}{A \code{data.frame} containing genomic bins associated with a given
@@ -15,6 +15,8 @@ cluster label}
 \item{scrna_aggr}{\code{data.frame} containing aggregrated single cell gene counts}
 
 \item{genes}{a character vector of genes to be used as features to the model}
+
+\item{k}{number of neighbours considered}
 
 \item{encode_signal}{An object of class \code{"GRanges"} containing normalized
 ChIP-seq signal indensity values sourced from Mouse ENCODE}

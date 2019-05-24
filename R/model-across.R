@@ -10,6 +10,7 @@
 #' @param data_split a list of cell types to be used for TRAINING and VALIDATION
 #' @param output_dir optional; if specified, then function will output model/loci-specific
 #' scatterplots with modeling statistics to the specified directory
+#' @param k number of neighbours considered
 #' @param scrna_aggr \code{data.frame} containing aggregrated single cell gene counts
 #' @param genes a character vector of genes to be used as features to the model
 #' @param seed set seed for model reproducibility
@@ -21,7 +22,7 @@
 #' @importFrom FNN knn.reg
 #' @importFrom cowplot plot_grid save_plot
 #' @export
-model_across_celltypes <- function(clusters, scrna_aggr, genes = NULL,
+model_across_celltypes <- function(clusters, scrna_aggr, genes = NULL, k = 3,
                                    encode_signal, encode_expr, data_split,
                                    output_dir = NULL, seed = 42){
   start_time <- Sys.time()
@@ -67,7 +68,7 @@ model_across_celltypes <- function(clusters, scrna_aggr, genes = NULL,
 
     # test
     test_model <- FNN::knn.reg(train = t(X_train), test = t(scrna_aggr[row.names(scrna_aggr) %in% genes, ]),
-                               y = colMeans(as.data.frame(mcols(Y_train))), k = 2)$pred
+                               y = colMeans(as.data.frame(mcols(Y_train))), k = k)$pred
     names(test_model) <- names(scrna_aggr)
     test_model <- c(test_model, CLUSTER = as.integer(y))
 
