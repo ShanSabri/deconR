@@ -1,4 +1,4 @@
-# deconR
+# deconR <img src="man/figures/deconR_hex.png" align="right" alt="" width=300/>
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/ShanSabri/deconR/graphs/commit-activity) 
